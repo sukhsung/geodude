@@ -395,30 +395,33 @@ class ADC8( ):
         cont = True
         if self.board_type == 'ADC-8x' and self.NUM_CHANNELS==4:
             self.device.read(8)
+
+        print("[",end="")
         while cont:
             time_cur = time.time()
             time_elapsed = floor(time_cur - time_start)
             if time_elapsed == time_counter:
-                print(time_elapsed)
+                # print(f"Time Elapsed: {time_elapsed}")
+                print(".",end="")
                 time_counter += 1
             n = self.device.read(1)		# Read the buffer's length byte
             
             if len(n) == 0:
-                print("Timeout")
+                print("\nTimeout")
                 break
             n = n[0]
             if n == 0:
-                print("End of data")
+                print("\nEnd of data")
                 break
 
             d = self.device.read(n)		# Read the buffer contents
             if len(d) < n:
-                print("Short data buffer received")
+                print("\nShort data buffer received")
                 break
             
             if n % blocksize != 0:
                 if not warned:
-                    print("Warning: Invalid buffer length", n)
+                    print("\nWarning: Invalid buffer length", n)
                     warned = True
                 n -= n % blocksize
 
@@ -434,6 +437,7 @@ class ADC8( ):
 
             total_blocks += n // blocksize
 
+        print("]")
         self.device.write(b"\n")
 
         self.device.timeout = self.default_timeout#0.01
