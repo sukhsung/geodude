@@ -6,3 +6,5 @@
 
 `git clone https://github.com/sukhsung/geodude.git`
 `cd geodude`
+`chmod +x setup.sh`
+`chmod +x geodude.sh`
