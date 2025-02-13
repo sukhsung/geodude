@@ -404,9 +404,9 @@ class ADC8( ):
             if time_elapsed == time_counter:
                 # print(f"Time Elapsed: {time_elapsed}")
                 print(".",end="")
+                dot_counter +=1
                 if dot_counter%20:
                     print(" ")
-                dot_counter +=1
                 time_counter += 5
             n = self.device.read(1)		# Read the buffer's length byte
             
