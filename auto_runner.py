@@ -100,7 +100,7 @@ class governor():
         self.cron.remove_all(comment='Geophone')
         self.cron.write()
 
-        job = self.cron.new(command=f'{self.pm.path}/run_geodude', comment='Geophone')
+        job = self.cron.new(command=f'/home/{self.pm.user}/geodude/run_geodude', comment='Geophone')
         job.setall( self.config['schedule'])
         job.enable()
         self.cron.write()
