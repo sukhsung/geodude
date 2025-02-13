@@ -5,30 +5,24 @@ from crontab import CronTab
 
 
 class path_manager():
+    user = 'raspberry'
+    prefix = '/media'
     def __init__(self, dev=False):
         if dev:
-            self.user='raspberry'
             self.prefix='./media'
-        else:
-            self.user = os.environ.get('USER')
-            self.prefix='/media'
 
-        print( "Loading Configuration File")
-        self.load_config()
-        self.check_config()
+        print( " ")
+        print( datetime.datetime.now() )
 
-        print( "Prepping Folder Structure") 
+        if self.load_config() == False:
+            return
+
         self.prepare_path()
 
     def prepare_path( self ):
-        if not os.path.isdir( f'{self.path}/results'):
-            os.mkdir( f'{self.path}/results' )
+        print( "Prepping Folder Structure") 
+        os.makedirs( f'{self.path}/results', exist_ok=True )
 
-        now = datetime.datetime.now()
-        folder = f'{now.year}-{now.month}-{now.day}'
-        self.savepath = f'{self.path}/results/{folder}'
-        if not os.path.isdir( self.savepath ):
-            os.mkdir( self.savepath )
 
     def list_drives(self):
         try:
@@ -38,8 +32,9 @@ class path_manager():
             return []
         
     def load_config(self):
+        print( "Loading Configuration File")
         dir_media = self.list_drives()
-
+    
         if len(dir_media) == 0:
             return False
         else:
@@ -49,39 +44,52 @@ class path_manager():
 
                     file_config = open(f'{self.path}/config.json','r')
                     self.config = json.load( file_config )
-
-                    return True
+                    return self.check_config()
             return False
-        
-    def check_config( self ):
+
+    def print_config( self ):
         try:
             print(f"Sampling: {self.config['sampling']}")
+            print(f"Found {len(self.config['ADC'])} ADC Settings")
+            for adc in self.config['ADC']:
+                print( f"Gain: {adc['gain']}, Polarity: {adc['polarity']}, Buffer: {adc['buffer']}")
+            print(f"Acquisition Time (s): {self.config['time_acquire']}")
+            print(f"Cron schedule: {self.config['schedule']}")
+        except:
+            print("!!!!! Something wrong with config")
+        
+        
+    def check_config( self ):
+        print("Checking Configuration File")
+        try:
+            _ = self.config['sampling']
         except:
             print("Invalid Sampling Configuration")
             return False
         
         try:
-            print(f"Found {len(self.config['ADC'])} ADC Settings")
-
+            _ = len(self.config['ADC'])
             for adc in self.config['ADC']:
-                print( f"Gain: {adc['gain']}, Polarity: {adc['polarity']}, Buffer: {adc['buffer']}")
-
+                _ = adc['gain']
+                _ = adc['polarity']
+                _ = adc['buffer']
         except:
             print("Invalid ADC Configuration")
             return False
         
         try:
-            print(f"Acquisition Time (s): {self.config['time_acquire']}")
+            _ = self.config['time_acquire']
         except:
             print("Invalid Acquisition Time")
             return False
         
         try:
-            print(f"Cron schedule: {self.config['schedule']}")
+            _ = self.config['schedule']
         except:
             print("Invalid cron schedule")
             return False
         
+        return True
         
 
 
@@ -94,13 +102,13 @@ class governor():
         self.cron = CronTab(user=True)
         self.set_crontab()
 
-        print(" All Set!")
+        print("All Set!")
 
     def set_crontab(self):
         self.cron.remove_all(comment='Geophone')
         self.cron.write()
 
-        job = self.cron.new(command=f'/home/{self.pm.user}/geodude/run_geodude', comment='Geophone')
+        job = self.cron.new(command=f'/home/{self.pm.user}/geodude/run_geodude.sh >> {self.pm.path}/log.txt', comment='Geophone')
         job.setall( self.config['schedule'])
         job.enable()
         self.cron.write()
@@ -129,8 +137,12 @@ class geodude():
 
     def start_acquire(self):
         now = datetime.datetime.now()
-        fname = f'{now.hour}:{now.minute}:{now.second}.csv'
-        self.device.prepare_acquire( f'{self.pm.savepath}/{fname}', self.config['time_acquire'])
+        folder = f'{now.year}-{now.month:02d}-{now.day:02d}'
+        fname = f'{now.hour:02d}-{now.minute:02d}-{now.second:02d}.csv'
+        self.savepath = f'{self.pm.path}/results/{folder}'
+
+        os.makedirs( self.savepath, exist_ok=True )
+        self.device.prepare_acquire( f'{self.savepath}/{fname}', self.config['time_acquire'])
         print( f"Start acquiring for {self.config['time_acquire']} s")
         print( f"Saving to {self.device.acquire_file.name}")
         self.device.start_acquire()
