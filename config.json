@@ -1,0 +1,15 @@
+{
+  "__comment":"Test Config",
+  "sampling":400,
+  "ADC":[
+    {"gain":128, "polarity":1, "buffer":"u"},
+    {"gain":128, "polarity":1, "buffer":"u"},
+    {"gain":128, "polarity":1, "buffer":"u"},
+    {"gain":128, "polarity":1, "buffer":"u"},
+    {"gain":64,  "polarity":2, "buffer":"b"},
+    {"gain":32,  "polarity":2, "buffer":"b"},
+    {"gain":1,   "polarity":2, "buffer":"b"},
+    {"gain":1,   "polarity":2, "buffer":"b"}],
+  "time_acquire": 5,
+  "schedule": "* * * * *"
+}
