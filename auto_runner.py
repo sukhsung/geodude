@@ -85,7 +85,7 @@ class path_manager():
         
 
 
-class governer():
+class governor():
     def __init__(self, dev=False):
         self.pm = path_manager(dev=dev)
         self.config = self.pm.config
