@@ -392,7 +392,6 @@ class ADC8( ):
 
         time_start = time.time()
         time_counter = 0
-        dot_counter = 0
         cont = True
         if self.board_type == 'ADC-8x' and self.NUM_CHANNELS==4:
             self.device.read(8)
@@ -404,9 +403,6 @@ class ADC8( ):
             if time_elapsed == time_counter:
                 # print(f"Time Elapsed: {time_elapsed}")
                 print(".",end="")
-                dot_counter +=1
-                if dot_counter%20:
-                    print(" ")
                 time_counter += 5
             n = self.device.read(1)		# Read the buffer's length byte
             
